@@ -1,5 +1,1 @@
--------------------
-C# / .NET Example
--------------------
-On the ASPX page was a carousel of images with links. Most image ads were for sales. 
-The C# DateTime is used to hide the DIV ID on the carousel of an image ad that had expired.
+C# .NET examples by Rose from a real world employment experience. To keep the previous employer anonymous, I have changed certain file, element, etc. names. 
