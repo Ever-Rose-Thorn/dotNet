@@ -1,0 +1,117 @@
+##ASPX page
+<form id="form1" runat="server">
+    <div>
+    <asp:Panel ID="pnlCloseButton" runat="server">
+
+        <asp:Button ID="Button1" runat="server" Text="Close Window" CssClass="closewin" OnClientClick="window.close(); return false;" CausesValidation="false" />
+<br /><br />
+</asp:Panel>
+                <asp:Panel ID="PanelMessage" runat="server">
+                <p>Thank you for your feedback about your organization. Please give us 24-48 hours (Monday-Friday) to complete your request.</p>
+            </asp:Panel>
+    <asp:Panel ID="PanelForm" runat="server">
+                <div style="width:80%;">
+                About the club submission form:<br />
+                <ul>
+                <li>Organization name, city, and state (required)</li>
+                <li>Please give us a contact email address (required)</li>
+                <li>If you only want us to list your website address excluding email, please check box.</li>
+                </ul>
+                </div>
+                <br />
+                <asp:Label ID="lblOrgName" runat="server" AssociatedControlID="txtName" Text="Organization Name:" /><br />
+                <asp:TextBox runat="server" ID="txtName" CssClass="miscfields" />
+                <asp:RequiredFieldValidator ID="rfvName" runat="server" ControlToValidate="txtName" Text="* Required Field" />
+                <br /><br />
+                <asp:Label ID="lblOrgWebsite" runat="server" AssociatedControlID="txtURL" Text="Organization Website URL:" />
+                <br />
+                <asp:TextBox runat="server" ID="txtURL" CssClass="miscfields" /><asp:Label ID="Label2"
+                    runat="server" Text=""></asp:Label>
+<asp:CustomValidator ID="Custom1" ClientValidationFunction="CheckBoxValidation" runat="server">*You have checked to display website instead of email address. Please enter a website address or uncheck box below.</asp:CustomValidator> 
+                <br /><br />
+                <asp:CheckBox ID="CheckBox1" runat="server" Text="Display website instead of email address" />
+                <br /><br />
+                <asp:Label ID="lblOrgEmail" runat="server" AssociatedControlID="txtEmail" Text="Organization E-Mail:" /><br />
+                <asp:TextBox runat="server" ID="txtEmail" CssClass="miscfields" />
+                <asp:RequiredFieldValidator ID="rfvEmail" runat="server" Text="* Required Field" ControlToValidate="txtEmail"></asp:RequiredFieldValidator>
+                <asp:RegularExpressionValidator ID="revEmail" runat="server" 
+                    ErrorMessage="Not a valid email address" ControlToValidate="txtEmail" 
+                    ValidationExpression="\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*"></asp:RegularExpressionValidator>
+                <br /><br />
+                <asp:Label ID="lblOrgCity" runat="server" AssociatedControlID="txtCity" Text="City:" /><br />
+                <asp:TextBox runat="server" ID="txtCity" CssClass="miscfields" />
+                <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ControlToValidate="txtCity" Text="* Required Field" />
+                <br /><br />
+<asp:DropDownList ID="drpState" Runat="server" AutoPostBack="false" DataSourceID="XmlDataSource1" DataValueField="Name" DataTextField="Name">
+        </asp:DropDownList>
+        <asp:XmlDataSource ID="XmlDataSource1" runat="server" DataFile="~/drpListState.xml" XPath="Root/States/state"></asp:XmlDataSource>
+        <asp:CompareValidator ID="CompareValidator1" runat="server" ControlToValidate="drpState" Operator="NotEqual" ValueToCompare="Select State" Text="Please select a state"></asp:CompareValidator>
+                <br />
+                <br />
+                <asp:Button runat="server" ID="btnSubmit" OnClick="FormSubmit" Text="Submit" CausesValidation="true" />
+                <br /><br />
+            </asp:Panel>
+    </div>
+    </form>
+##End
+
+## C# CS file snippets
+
+public partial class SubmitOrg : System.Web.UI.Page
+{
+    public string recipient = "email@email.com";
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        PanelMessage.Visible = false;
+    }
+
+protected void FormSubmit(object sender, EventArgs e)
+    {
+
+        if (!Page.IsValid)
+        {
+            return;
+        }
+
+            //  Organization Details
+            string name = txtName.Text.Trim();
+            string URL = txtURL.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string city = txtCity.Text.Trim();
+            string state = drpState.Text.Trim();
+
+            //  Email Details
+            string subject = "Organization Submission";
+            string mailto = recipient;  // set as a public page variable before page load
+
+            // Build Body of email
+            string body = "Club Name: " + name + Environment.NewLine +
+                "Web URL: " + URL + Environment.NewLine +
+                "Organization E-Mail: " + email + Environment.NewLine +
+                "City: " + city + Environment.NewLine +
+                "State: " + state + Environment.NewLine + Environment.NewLine +
+                "DO NOT REPLY DIRECTLY TO THIS EMAIL";
+
+            back_functions example = new back_functions();
+            try
+            {
+                example.openConnection();
+                example.sendEmail(recipient, subject, body);
+                exmaple.closeConnection();
+            }
+            catch (Exception err)
+            {
+                string message = "The system was unable to send club submission email. Error: " + err.Message;
+                System.Console.Out.WriteLine(message);
+
+                if (bf != null)
+                    bf.closeConnection();
+            }
+
+            PanelForm.Visible = false;
+            PanelMessage.Visible = true;
+
+        }
+
+    }
