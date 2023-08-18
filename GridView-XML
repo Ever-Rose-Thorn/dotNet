@@ -1,0 +1,97 @@
+## From .NET ASPX file
+<asp:DropDownList ID="ddlState" runat="server" AutoPostBack="True" AppendDataBoundItems="True" OnSelectedIndexChanged="ddlState_SelectedIndexChanged">
+
+#GridView with paging settings
+<asp:GridView ID="grvClubs" runat="server" AllowPaging="True" 
+            AutoGenerateColumns="False" DataSourceID="grvClub" PageSize="15" 
+                CssClass="GridStyling" GridLines="Both" CellPadding="3" CellSpacing="0" PagerSettings-Mode="NextPrevious" OnPageIndexChanged="grvClubs_PageIndexChanged" PagerSettings-NextPageImageUrl="/img/pgNavNext.png" PagerSettings-PreviousPageImageUrl="/img/pgNavPrev.png" PagerSettings-Position="TopAndBottom">
+
+#Columns in GridView with one DataField example
+ <AlternatingRowStyle BackColor="#EEEEEE" />
+            <Columns>
+               <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" 
+                    ItemStyle-CssClass="Name" HeaderStyle-CssClass="NameHead">
+<ItemStyle CssClass="Name"></ItemStyle>
+                </asp:BoundField>
+</Columns>
+
+#Data source is an XML file
+<asp:XmlDataSource ID="grvClub" runat="server" DataFile="~/nC.xml"></asp:XmlDataSource>
+
+##End
+
+## C# file .CS
+protected void Page_Load(object sender, EventArgs e)
+    {
+
+        if (!IsPostBack)
+        {
+            this.BindXml();
+        }
+
+        LoadAuxContent();
+    }
+
+    public void BindXml()
+    {
+        string filePath = Server.MapPath("~/nC.xml");
+        using (DataSet ds = new DataSet())
+        {
+            ds.ReadXml(filePath);
+            DataTable dt = ds.Tables[0];
+            var query = dt.AsEnumerable().Select(a => a.Field<string>("State").ToString()).Distinct().OrderBy(name => name);
+            ddlState.DataSource = query;
+            ddlState.DataBind();
+
+        }
+
+    }
+
+#Showing only one state
+protected void ddlState_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+
+        string getState;
+        switch (ddlState.SelectedItem.Value)
+        {
+            case "AL":
+                getState = "AL";
+                grvClub.XPath = "/Clubs/Club[@State='" + getState + "']";
+                break;
+
+default:
+                grvClub.XPath = "/Clubs/Club";
+                break;
+
+        }
+    }
+
+#dropdown list
+public void grvClubs_PageIndexChanged(object sender, EventArgs e)
+    {
+
+        if (ddlState.SelectedItem.Text != "Showing All Clubs")
+        {
+            grvClub.XPath = "/Clubs/Club[@State='" + ddlState.SelectedValue + "']";
+        }
+        else
+        {
+            grvClub.XPath = "/Clubs/Club";
+
+        }    }
+
+##XML file
+
+#Snippet from XML file
+
+<Clubs>
+  <Club
+      Name="Acme"
+      City="Wilsonville,"
+      State="AL"
+      Website="http://www.acme.com"
+      Email=""
+  />
+
+##End
